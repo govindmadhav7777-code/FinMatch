@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bank_type }} Banks - Bank Comparison</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Home</a>
+        </nav>
+        
+        <h1 class="text-center mb-4">{{ bank_type }} Banks</h1>
+        
+        <div class="filter-container">
+            <select id="bank-type-select" class="form-select" aria-label="Select bank type">
+                <option value="all">Show All Banks</option>
+                <option value="Public" {% if bank_type == 'Public' %}selected{% endif %}>Public Banks</option>
+                <option value="Private" {% if bank_type == 'Private' %}selected{% endif %}>Private Banks</option>
+            </select>
+        </div>
+
+        <div class="table-responsive">
+            <table id="banks-table" class="table table-striped table-hover align-middle text-center">
+                <thead>
+                    <tr>
+                        <th>Bank Name</th>
+                        <th>Sector</th>
+                        <th>CAGR (%)</th>
+                        <th>NPA (%)</th>
+                        <th>Risk Factor</th>
+                        <th>CAMEL Rating</th>
+                        <th>Customer Satisfaction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bank in banks %}
+                    <tr>
+                        <td>{{ bank.bank_name }}</td>
+                        <td>{{ bank.sector }}</td>
+                        <td>{{ "%.2f"|format(bank.cagr|float) }}</td>
+                        <td>{{ "%.2f"|format(bank.npa|float) }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if bank.risk_factor == 'Low' %}bg-success
+                                {% elif bank.risk_factor == 'Medium' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ bank.risk_factor }}
+                            </span>
+                        </td>
+                        <td>{{ bank.camel_rating }}</td>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span>{{ bank.customer_satisfaction }}/10</span>
+                                <div class="ms-2" style="width: 50px;">
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ (bank.customer_satisfaction|float / 10 * 100)|round }}%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if not banks %}
+        <div class="text-center mt-5">
+            <h3>No banks found for this category</h3>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Go Back to Home</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

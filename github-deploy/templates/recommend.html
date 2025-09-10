@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Recommendations - Bank Comparison</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Home</a>
+        </nav>
+        
+        <h1 class="text-center mb-4">AI Bank Recommendations</h1>
+        
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Get Personalized Recommendations</h5>
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label for="preference" class="form-label">Select your preference:</label>
+                                <select name="preference" id="preference" class="form-select" required>
+                                    <option value="">Choose your priority...</option>
+                                    <option value="general" {% if request.form.preference == 'general' %}selected{% endif %}>
+                                        General (Balanced approach)
+                                    </option>
+                                    <option value="low_npa" {% if request.form.preference == 'low_npa' %}selected{% endif %}>
+                                        Low NPA (Risk-averse)
+                                    </option>
+                                    <option value="high_cagr" {% if request.form.preference == 'high_cagr' %}selected{% endif %}>
+                                        High Growth (CAGR focused)
+                                    </option>
+                                    <option value="customer_first" {% if request.form.preference == 'customer_first' %}selected{% endif %}>
+                                        Customer Service Priority
+                                    </option>
+                                    <option value="balanced" {% if request.form.preference == 'balanced' %}selected{% endif %}>
+                                        Balanced Portfolio
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">Get Recommendations</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if results %}
+        <div class="row">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Top 3 Recommended Banks</h3>
+                
+                {% if summary %}
+                <div class="alert alert-info text-center mb-4">
+                    <strong>Analysis Summary:</strong> {{ summary }}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    {% for result in results %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-primary text-white text-center">
+                                <h5 class="mb-0">Rank #{{ loop.index }}</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <h4 class="card-title">{{ result.bank }}</h4>
+                                <p class="card-text">
+                                    <span class="badge bg-secondary">{{ result.sector }}</span>
+                                </p>
+                                <div class="mb-3">
+                                    <h2 class="text-primary">{{ "%.4f"|format(result.score) }}</h2>
+                                    <small class="text-muted">AI Score</small>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ (result.score * 100)|round }}%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h4>Detailed Bank Information</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Bank Name</th>
+                                        <th>Sector</th>
+                                        <th>CAGR (%)</th>
+                                        <th>NPA (%)</th>
+                                        <th>Risk Factor</th>
+                                        <th>CAMEL Rating</th>
+                                        <th>Customer Satisfaction</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bank in banks %}
+                                        {% for result in results %}
+                                            {% if bank.bank_name == result.bank %}
+                                            <tr>
+                                                <td><strong>{{ bank.bank_name }}</strong></td>
+                                                <td>{{ bank.sector }}</td>
+                                                <td>{{ "%.2f"|format(bank.cagr|float) }}</td>
+                                                <td>{{ "%.2f"|format(bank.npa|float) }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if bank.risk_factor == 'Low' %}bg-success
+                                                        {% elif bank.risk_factor == 'Medium' %}bg-warning
+                                                        {% else %}bg-danger{% endif %}">
+                                                        {{ bank.risk_factor }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ bank.camel_rating }}</td>
+                                                <td>{{ bank.customer_satisfaction }}/10</td>
+                                            </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

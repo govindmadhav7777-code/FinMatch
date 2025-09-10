@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Comparison System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="text-center mb-4">Indian Bank Comparison System</h1>
+        
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h3>Welcome to Bank Comparison Portal</h3>
+                        <p class="lead">Compare Indian banks, analyze their performance, and get AI-powered recommendations.</p>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-3 mb-3">
+                                <a href="{{ url_for('banks_page', bank_type='public') }}" class="btn btn-primary btn-lg w-100">
+                                    Public Banks
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{{ url_for('banks_page', bank_type='private') }}" class="btn btn-success btn-lg w-100">
+                                    Private Banks
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{{ url_for('compare') }}" class="btn btn-warning btn-lg w-100">
+                                    Compare Banks
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{{ url_for('recommend') }}" class="btn btn-info btn-lg w-100">
+                                    Get Recommendations
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <h3>All Banks Overview</h3>
+                <div class="table-responsive">
+                    <table id="banks-table" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Bank Name</th>
+                                <th>Sector</th>
+                                <th>CAGR (%)</th>
+                                <th>NPA (%)</th>
+                                <th>Risk Factor</th>
+                                <th>CAMEL Rating</th>
+                                <th>Customer Satisfaction</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bank in banks %}
+                            <tr>
+                                <td>{{ bank.bank_name }}</td>
+                                <td>{{ bank.sector }}</td>
+                                <td>{{ bank.cagr }}</td>
+                                <td>{{ bank.npa }}</td>
+                                <td>{{ bank.risk_factor }}</td>
+                                <td>{{ bank.camel_rating }}</td>
+                                <td>{{ bank.customer_satisfaction }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

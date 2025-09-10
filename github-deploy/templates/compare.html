@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Banks - Bank Comparison</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Home</a>
+        </nav>
+        
+        <h1 class="text-center mb-4">Compare Banks</h1>
+        
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <form method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="bank1" class="form-label">Select First Bank:</label>
+                                    <select name="bank1" id="bank1" class="form-select" required>
+                                        <option value="">Choose a bank...</option>
+                                        {% for bank in banks %}
+                                        <option value="{{ bank.bank_name }}" 
+                                                {% if bank1 and bank1.bank_name == bank.bank_name %}selected{% endif %}>
+                                            {{ bank.bank_name }} ({{ bank.sector }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="bank2" class="form-label">Select Second Bank:</label>
+                                    <select name="bank2" id="bank2" class="form-select" required>
+                                        <option value="">Choose a bank...</option>
+                                        {% for bank in banks %}
+                                        <option value="{{ bank.bank_name }}"
+                                                {% if bank2 and bank2.bank_name == bank.bank_name %}selected{% endif %}>
+                                            {{ bank.bank_name }} ({{ bank.sector }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">Compare Banks</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if bank1 and bank2 %}
+        <div class="row">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Comparison Results</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Parameter</th>
+                                <th class="text-center">{{ bank1.bank_name }}</th>
+                                <th class="text-center">{{ bank2.bank_name }}</th>
+                                <th class="text-center">Better Choice</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sector</strong></td>
+                                <td class="text-center">{{ bank1.sector }}</td>
+                                <td class="text-center">{{ bank2.sector }}</td>
+                                <td class="text-center">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CAGR (%)</strong></td>
+                                <td class="text-center">{{ "%.2f"|format(bank1.cagr|float) }}</td>
+                                <td class="text-center">{{ "%.2f"|format(bank2.cagr|float) }}</td>
+                                <td class="text-center">
+                                    {% if bank1.cagr|float > bank2.cagr|float %}
+                                        <span class="badge bg-success">{{ bank1.bank_name }}</span>
+                                    {% elif bank2.cagr|float > bank1.cagr|float %}
+                                        <span class="badge bg-success">{{ bank2.bank_name }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Tie</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>NPA (%)</strong></td>
+                                <td class="text-center">{{ "%.2f"|format(bank1.npa|float) }}</td>
+                                <td class="text-center">{{ "%.2f"|format(bank2.npa|float) }}</td>
+                                <td class="text-center">
+                                    {% if bank1.npa|float < bank2.npa|float %}
+                                        <span class="badge bg-success">{{ bank1.bank_name }}</span>
+                                    {% elif bank2.npa|float < bank1.npa|float %}
+                                        <span class="badge bg-success">{{ bank2.bank_name }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Tie</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Risk Factor</strong></td>
+                                <td class="text-center">
+                                    <span class="badge 
+                                        {% if bank1.risk_factor == 'Low' %}bg-success
+                                        {% elif bank1.risk_factor == 'Medium' %}bg-warning
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ bank1.risk_factor }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge 
+                                        {% if bank2.risk_factor == 'Low' %}bg-success
+                                        {% elif bank2.risk_factor == 'Medium' %}bg-warning
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ bank2.risk_factor }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% set risk_order = {'Low': 1, 'Medium': 2, 'High': 3} %}
+                                    {% if risk_order[bank1.risk_factor] < risk_order[bank2.risk_factor] %}
+                                        <span class="badge bg-success">{{ bank1.bank_name }}</span>
+                                    {% elif risk_order[bank2.risk_factor] < risk_order[bank1.risk_factor] %}
+                                        <span class="badge bg-success">{{ bank2.bank_name }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Tie</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>CAMEL Rating</strong></td>
+                                <td class="text-center">{{ bank1.camel_rating }}</td>
+                                <td class="text-center">{{ bank2.camel_rating }}</td>
+                                <td class="text-center">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer Satisfaction</strong></td>
+                                <td class="text-center">{{ bank1.customer_satisfaction }}/10</td>
+                                <td class="text-center">{{ bank2.customer_satisfaction }}/10</td>
+                                <td class="text-center">
+                                    {% if bank1.customer_satisfaction|float > bank2.customer_satisfaction|float %}
+                                        <span class="badge bg-success">{{ bank1.bank_name }}</span>
+                                    {% elif bank2.customer_satisfaction|float > bank1.customer_satisfaction|float %}
+                                        <span class="badge bg-success">{{ bank2.bank_name }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Tie</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
